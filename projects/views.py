@@ -1,0 +1,57 @@
+from django.shortcuts import render, redirect
+
+from django.http import HttpResponse
+from .models import Project
+from .forms import ProjectForm
+
+
+def projects(request):
+    projects = Project.objects.all()
+    context = {'projects': projects}
+    return render(request, 'projects/projects.html', context)
+
+
+def project(request, pk):
+    projectObj = Project.objects.get(id=pk)
+    # tags = projectObj.tags.all()
+    return render(request, 'projects/single-project.html', {'project': projectObj})
+
+
+def createProject(request):
+    form = ProjectForm()
+
+    if request.method == 'POST':
+        form = ProjectForm(request.POST, request.FILES)
+        #  request.FILES > TO PROCESS THE FILES THAT UPLOADED > TO BACKEND TO GET FILES
+        if form.is_valid():
+            # form.is_valid() > Django MODELFORMS checks for any suspisios thinks or not
+            form.save()  # .save() creates that object and will add new object to database
+            # if everything goes write then redirect user to projects > name of root dir >urls.py
+            return redirect('projects')
+
+    context = {'form': form}
+    return render(request, 'projects/project_form.html', context)
+
+
+def updateProject(request, pk):
+    project = Project.objects.get(id=pk)
+    form = ProjectForm(instance=project)
+
+    if request.method == 'POST':
+        form = ProjectForm(request.POST, request.FILES, instance=project)
+        if form.is_valid():
+            form.save()
+            return redirect('projects')
+
+    context = {'form': form}
+    return render(request, 'projects/project_form.html', context)
+
+
+def deleteProject(request, pk):
+    project = Project.objects.get(id=pk)
+    if request.method == 'POST':
+        project.delete()  # .delete() deletes the project from database
+        # if everything is fine then redirect to projects
+        return redirect('projects')
+    context = {'object': project}
+    return render(request, 'projects/delete_template.html', context)
