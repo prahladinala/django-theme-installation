@@ -1,5 +1,6 @@
 # ALL MODEL FORMS ARE STORED HERE
 from django.forms import ModelForm
+from django import forms
 from .models import Project
 
 
@@ -7,14 +8,17 @@ class ProjectForm(ModelForm):
     class Meta:
         model = Project
         fields = ['title', 'description', 'featured_image', 'demo_link', 'source_link', 'tags']
-        # OR
-        # fields = '__all__'
+        # widgets are used to customize the form
+        widgets = {
+            'tags': forms.CheckboxSelectMultiple(),
+        }
 
-# class MODELNAMEForm(ModelForm):
-#     class Meta:
-#         model = MODELNAME
-#         # fields = ['title', 'description'] > creates form for specific fields mensioned here
-#         # OR
-#         fields = '__all__' > creates form for every available field in MODELNAME Class Provided > exception non editable fields(id) and automatic fields (created)
+    # add class for fields
+    def __init__(self, *args, **kwargs):
+        super(ProjectForm, self).__init__(*args, **kwargs)
 
-# TO USE THIS FORM WE NEED TO IMPORT IT INTO VIEWS AND USE IN createProject Class
+        for name, field in self.fields.items():
+            placeholder = 'Add '+ name
+            field.widget.attrs.update({'class': 'input', 'placeholder': placeholder })
+        # self.fields['title'].widget.attrs.update({'class': 'input', 'placeholder': 'Add Title'})
+        # self.fields['description'].widget.attrs.update({'class': 'input', 'placeholder': 'Add Description'})
